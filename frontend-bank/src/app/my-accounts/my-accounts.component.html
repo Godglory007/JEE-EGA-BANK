@@ -1,0 +1,159 @@
+<div class="container mt-4">
+  <h2 class="mb-4">
+    <i class="bi bi-wallet2 me-2"></i>
+    Mes Comptes Bancaires
+  </h2>
+
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Chargement...</span>
+    </div>
+    <p class="mt-2">Chargement de vos comptes...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    {{ errorMessage }}
+  </div>
+
+  <!-- No accounts -->
+  <div *ngIf="!isLoading && accounts.length === 0" class="alert alert-info">
+    <i class="bi bi-info-circle-fill me-2"></i>
+    Vous n'avez pas encore de compte bancaire.
+  </div>
+
+  <!-- Accounts list -->
+  <div *ngIf="!isLoading && accounts.length > 0" class="row">
+    <!-- Left: Account cards -->
+    <div class="col-md-4">
+      <h5 class="text-muted mb-3">Vos comptes</h5>
+      <div *ngFor="let account of accounts" 
+           class="card mb-3 account-card"
+           [class.border-primary]="selectedAccount?.id === account.id"
+           [class.selected]="selectedAccount?.id === account.id"
+           (click)="selectAccount(account)">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h6 class="card-title mb-1">
+                <i class="bi" [ngClass]="account.type === 'CurrentAccount' ? 'bi-credit-card' : 'bi-piggy-bank'"></i>
+                {{ account.type === 'CurrentAccount' ? 'Compte Courant' : 'Compte Épargne' }}
+              </h6>
+              <small class="text-muted">{{ account.id }}</small>
+            </div>
+            <span class="badge" [ngClass]="account.status === 'ACTIVE' ? 'bg-success' : 'bg-secondary'">
+              {{ account.status }}
+            </span>
+          </div>
+          <h4 class="mt-3 mb-0 text-primary">{{ account.balance | number:'1.0-0' }} FCFA</h4>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Operations and transactions -->
+    <div class="col-md-8">
+      <div *ngIf="selectedAccount">
+        <!-- Operation form -->
+        <div class="card mb-4">
+          <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+              <i class="bi bi-arrow-left-right me-2"></i>
+              Effectuer une opération
+            </h5>
+          </div>
+          <div class="card-body">
+            <!-- Messages -->
+            <div *ngIf="operationSuccess" class="alert alert-success alert-dismissible">
+              <i class="bi bi-check-circle-fill me-2"></i>
+              {{ operationSuccess }}
+              <button type="button" class="btn-close" (click)="operationSuccess = ''"></button>
+            </div>
+            <div *ngIf="operationError" class="alert alert-danger alert-dismissible">
+              <i class="bi bi-exclamation-triangle-fill me-2"></i>
+              {{ operationError }}
+              <button type="button" class="btn-close" (click)="operationError = ''"></button>
+            </div>
+
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label">Type d'opération</label>
+                <select class="form-select" [(ngModel)]="operationType">
+                  <option value="CREDIT">Dépôt</option>
+                  <option value="DEBIT">Retrait</option>
+                  <option value="TRANSFER">Virement</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">Montant (FCFA)</label>
+                <input type="number" class="form-control" [(ngModel)]="amount" min="0" step="0.01">
+              </div>
+              <div class="col-md-4" *ngIf="operationType === 'TRANSFER'">
+                <label class="form-label">Compte destinataire</label>
+                <input type="text" class="form-control" [(ngModel)]="destinationAccount" placeholder="Numéro de compte">
+              </div>
+              <div class="col-12">
+                <label class="form-label">Description</label>
+                <input type="text" class="form-control" [(ngModel)]="description" placeholder="Description de l'opération">
+              </div>
+              <div class="col-12">
+                <button class="btn btn-primary" (click)="executeOperation()" [disabled]="operationLoading || amount <= 0">
+                  <span *ngIf="operationLoading" class="spinner-border spinner-border-sm me-2"></span>
+                  <i *ngIf="!operationLoading" class="bi bi-check-lg me-2"></i>
+                  {{ operationLoading ? 'Traitement...' : 'Valider' }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Operations history -->
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+              <i class="bi bi-clock-history me-2"></i>
+              Historique des opérations
+            </h5>
+            <button class="btn btn-outline-primary btn-sm" (click)="downloadStatement()" *ngIf="operations.length > 0">
+              <i class="bi bi-download me-1"></i>
+              Télécharger le relevé
+            </button>
+          </div>
+          <div class="card-body p-0">
+            <div *ngIf="operations.length === 0" class="p-4 text-center text-muted">
+              <i class="bi bi-inbox fs-1"></i>
+              <p class="mt-2">Aucune opération pour le moment</p>
+            </div>
+            <div class="table-responsive" *ngIf="operations.length > 0">
+              <table class="table table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Description</th>
+                    <th class="text-end">Montant</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let op of operations">
+                    <td>{{ op.operationDate | date:'dd/MM/yyyy HH:mm' }}</td>
+                    <td>
+                      <span class="badge" [ngClass]="op.operationType === 'CREDIT' ? 'bg-success' : 'bg-danger'">
+                        {{ op.operationType === 'CREDIT' ? 'Dépôt' : 'Retrait' }}
+                      </span>
+                    </td>
+                    <td>{{ op.description || '-' }}</td>
+                    <td class="text-end" [ngClass]="op.operationType === 'CREDIT' ? 'text-success' : 'text-danger'">
+                      {{ op.operationType === 'CREDIT' ? '+' : '-' }}{{ op.amount | number:'1.0-0' }} FCFA
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

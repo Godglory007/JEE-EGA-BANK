@@ -1,0 +1,28 @@
+@import "../node_modules/bootstrap/dist/css/bootstrap.min.css";
+@import "../node_modules/bootstrap-icons/font/bootstrap-icons.css";
+
+html, body { height: 100%}
+body { 
+  margin: 0; 
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  position: relative;
+}
+
+/* Filigrane (Watermark) du logo EGA Bank sur toutes les pages */
+body::after {
+  content: "";
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 500px;
+  background-image: url('/assets/img/logo-egabank.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.12;
+  pointer-events: none;
+  z-index: -1;
+}
+

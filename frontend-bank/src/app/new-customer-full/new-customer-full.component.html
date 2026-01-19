@@ -1,0 +1,172 @@
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">
+            <i class="bi bi-person-plus-fill me-2"></i>
+            Créer un Nouveau Client
+          </h4>
+        </div>
+        <div class="card-body">
+          <!-- Messages -->
+          <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            {{ errorMessage }}
+            <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+          </div>
+
+          <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show">
+            <i class="bi bi-check-circle-fill me-2"></i>
+            {{ successMessage }}
+            <button type="button" class="btn-close" (click)="successMessage = ''"></button>
+          </div>
+
+          <!-- Résultat de création -->
+          <div *ngIf="createdCustomer" class="card bg-light mb-4">
+            <div class="card-body">
+              <h5 class="card-title text-success">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                Client créé avec succès
+              </h5>
+              <div class="row">
+                <div class="col-md-6">
+                  <p><strong>Nom:</strong> {{ createdCustomer.name }}</p>
+                  <p><strong>Email:</strong> {{ createdCustomer.email }}</p>
+                  <p><strong>Nom d'utilisateur:</strong> {{ createdCustomer.username }}</p>
+                </div>
+                <div class="col-md-6" *ngIf="createdCustomer.accounts?.length > 0">
+                  <p><strong>Numéro de compte:</strong> {{ createdCustomer.accounts[0].accountNumber }}</p>
+                  <p><strong>Type de compte:</strong> {{ createdCustomer.accounts[0].accountType === 'CurrentAccount' ? 'Compte Courant' : 'Compte Épargne' }}</p>
+                  <p><strong>Solde initial:</strong> {{ createdCustomer.accounts[0].balance | number:'1.0-0' }} FCFA</p>
+                </div>
+              </div>
+              <div class="alert alert-info mt-2">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                Le client peut maintenant se connecter avec son email et le mot de passe défini.
+              </div>
+            </div>
+          </div>
+
+          <!-- Formulaire -->
+          <form [formGroup]="customerForm" (ngSubmit)="onSubmit()">
+            <!-- Section Informations Personnelles -->
+            <h5 class="text-muted mb-3">
+              <i class="bi bi-person me-2"></i>
+              Informations Personnelles
+            </h5>
+            
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Nom complet *</label>
+                <input type="text" class="form-control" formControlName="name" 
+                       [class.is-invalid]="customerForm.get('name')?.invalid && customerForm.get('name')?.touched">
+                <div class="invalid-feedback">Le nom doit contenir au moins 3 caractères</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Email *</label>
+                <input type="email" class="form-control" formControlName="email"
+                       [class.is-invalid]="customerForm.get('email')?.invalid && customerForm.get('email')?.touched">
+                <div class="invalid-feedback">Email invalide</div>
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Téléphone</label>
+                <div class="input-group">
+                  <select class="form-select" formControlName="countryCode" style="max-width: 140px;">
+                    <option *ngFor="let country of countryCodes" [value]="country.code">
+                      {{ country.flag }} {{ country.code }}
+                    </option>
+                  </select>
+                  <input type="tel" class="form-control" formControlName="phone" placeholder="90 12 34 56">
+                </div>
+                <small class="text-muted">Exemple: 90 12 34 56</small>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Date de naissance *</label>
+                <input type="date" class="form-control" formControlName="dateOfBirth"
+                       [class.is-invalid]="customerForm.get('dateOfBirth')?.invalid && customerForm.get('dateOfBirth')?.touched">
+                <div class="invalid-feedback">Date de naissance requise</div>
+              </div>
+            </div>
+
+            <hr class="my-4">
+
+            <!-- Section Compte Utilisateur -->
+            <h5 class="text-muted mb-3">
+              <i class="bi bi-key me-2"></i>
+              Compte Utilisateur
+            </h5>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Mot de passe *</label>
+                <input type="password" class="form-control" formControlName="password"
+                       [class.is-invalid]="customerForm.get('password')?.invalid && customerForm.get('password')?.touched">
+                <div class="invalid-feedback">Mot de passe requis (min. 4 caractères)</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Confirmer le mot de passe *</label>
+                <input type="password" class="form-control" formControlName="confirmPassword"
+                       [class.is-invalid]="customerForm.hasError('mismatch') && customerForm.get('confirmPassword')?.touched">
+                <div class="invalid-feedback">Les mots de passe ne correspondent pas</div>
+              </div>
+            </div>
+
+            <hr class="my-4">
+
+            <!-- Section Compte Bancaire -->
+            <h5 class="text-muted mb-3">
+              <i class="bi bi-bank me-2"></i>
+              Compte Bancaire
+            </h5>
+
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Type de compte *</label>
+                <select class="form-select" formControlName="accountType">
+                  <option value="CURRENT">Compte Courant</option>
+                  <option value="SAVING">Compte Épargne</option>
+                </select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Solde initial (FCFA)</label>
+                <input type="number" class="form-control" formControlName="initialBalance" min="0">
+              </div>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-6" *ngIf="accountType === 'CURRENT'">
+                <label class="form-label">Découvert autorisé (FCFA)</label>
+                <input type="number" class="form-control" formControlName="overdraft" min="0">
+              </div>
+              <div class="col-md-6" *ngIf="accountType === 'SAVING'">
+                <label class="form-label">Taux d'intérêt (%)</label>
+                <input type="number" class="form-control" formControlName="interestRate" step="0.1" min="0">
+              </div>
+            </div>
+
+            <div class="alert alert-info">
+              <i class="bi bi-info-circle-fill me-2"></i>
+              Un numéro de compte sera généré automatiquement.
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+              <button type="button" class="btn btn-secondary" routerLink="/customers">
+                <i class="bi bi-arrow-left me-2"></i>
+                Retour
+              </button>
+              <button type="submit" class="btn btn-primary" [disabled]="customerForm.invalid || isLoading">
+                <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2"></span>
+                <i *ngIf="!isLoading" class="bi bi-check-lg me-2"></i>
+                {{ isLoading ? 'Création...' : 'Créer le client' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,29 @@
+<div class="container-fluid mt-4">
+  <div class="row">
+    <!-- Stylish Cards -->
+    <div class="col-md-4 mb-4">
+      <div class="card text-white bg-primary">
+        <div class="card-body">
+          <h5 class="card-title">Total Clients</h5>
+          <p class="card-text">{{ totalCustomers }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="card text-white bg-success">
+        <div class="card-body">
+          <h5 class="card-title">Total Comptes</h5>
+          <p class="card-text">{{ totalAccounts }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="card text-white bg-info">
+        <div class="card-body">
+          <h5 class="card-title">Solde Total</h5>
+          <p class="card-text">{{ totalBalance | number:'1.0-0' }} FCFA</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

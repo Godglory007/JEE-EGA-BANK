@@ -1,0 +1,27 @@
+<div class="container">
+  <mat-card class="login-form" [formGroup]="loginForm">
+    <!-- Logo centré -->
+    <div class="login-logo-container">
+      <img src="assets/img/logo-egabank.png" alt="EGA Bank Logo" class="login-logo">
+    </div>
+    
+    <mat-card-header>
+      <mat-card-title><mat-icon>lock</mat-icon> Connexion</mat-card-title>
+    </mat-card-header>
+    <mat-divider></mat-divider>
+    <span></span>
+    <mat-card-content>
+      <mat-form-field appearance="outline" class="full-width-input">
+        <mat-label>Nom d'utilisateur ou Email</mat-label>
+        <input matInput formControlName="username" placeholder="Entrez votre nom d'utilisateur ou email">
+        <mat-icon matSuffix>person_outline</mat-icon>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="full-width-input">
+        <mat-label>Mot de passe</mat-label>
+        <input matInput type="password" formControlName="password" placeholder="Entrez votre mot de passe">
+        <mat-icon matSuffix>lock_outline</mat-icon>
+      </mat-form-field>
+      <button (click)="login()" mat-raised-button color="primary" class="w-100">Se connecter</button>
+    </mat-card-content>
+  </mat-card>
+</div>

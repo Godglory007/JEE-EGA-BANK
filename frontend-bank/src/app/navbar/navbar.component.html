@@ -1,0 +1,136 @@
+<mat-toolbar color="primary">
+  <button (click)="menuDrawer.toggle()" *ngIf="authService.isAdmin()" mat-icon-button>
+    <mat-icon>menu</mat-icon>
+  </button>
+  <img src="/assets/img/logo-egabank.png" alt="EGABANK" style="height: 40px; margin-right: 10px;" onerror="this.style.display='none'">
+  <span>EGABANK</span>
+  <span style="flex: auto"></span>
+  <button mat-button routerLink="/admin/home" *ngIf="authService.isAdmin()">
+    <mat-icon>home</mat-icon>
+    Accueil
+  </button>
+  <button mat-button routerLink="/user/home" *ngIf="!authService.isAdmin() && authService.isAuth">
+    <mat-icon>home</mat-icon>
+    Accueil
+  </button>
+  <!-- Menu Utilisateur (Client) -->
+  <button *ngIf="!authService.isAdmin() && authService.isAuth" mat-button routerLink="/user/my-accounts">
+    <mat-icon>account_balance_wallet</mat-icon>
+    Mes Comptes
+  </button>
+  <button *ngIf="authService.isAdmin()" [matMenuTriggerFor]="CusMenu" mat-button>
+    <mat-icon>person</mat-icon>
+    <mat-icon iconPositionEnd>keyboard_arrow_down</mat-icon>
+    Clients
+  </button>
+  <!-- Customer Menu -->
+  <mat-menu #CusMenu="matMenu">
+    <button mat-menu-item routerLink="/admin/customers">Rechercher Clients</button>
+    <button mat-menu-item routerLink="/admin/new-customer-full">Créer Client Complet</button>
+  </mat-menu>
+  <!-- Accounts Button -->
+  <button *ngIf="authService.isAdmin()" [matMenuTriggerFor]="accountMenu" mat-button>
+    <mat-icon>account_balance</mat-icon>
+    <mat-icon iconPositionEnd>keyboard_arrow_down</mat-icon>
+    Comptes
+  </button>
+  <!-- Accounts Menu -->
+  <mat-menu #accountMenu="matMenu">
+    <button mat-menu-item routerLink="/admin/accounts">Rechercher Comptes</button>
+    <button mat-menu-item routerLink="/admin/accountsList">Gérer les Comptes</button>
+  </mat-menu>
+  <!-- Profile Menu -->
+  <button *ngIf="authService.isAuth" [matMenuTriggerFor]="ProfilMenu" mat-button>
+    Profil : {{ authService.username }}
+    <mat-icon iconPositionEnd>keyboard_arrow_down</mat-icon>
+  </button>
+  <mat-menu #ProfilMenu="matMenu">
+    <button mat-menu-item>
+      Rôle: {{ authService.roles == 'ROLE_USER' ? 'Utilisateur' : (authService.roles.includes('ADMIN') ? 'Administrateur' : 'NULL') }}
+    </button>
+    <button mat-menu-item routerLink="/admin/profile" *ngIf="authService.isAdmin()">Changer mot de passe</button>
+    <button mat-menu-item routerLink="/user/profile" *ngIf="!authService.isAdmin()">Changer mot de passe</button>
+  </mat-menu>
+  <button (click)="logout()" color="warn" mat-raised-button>Déconnexion</button>
+</mat-toolbar>
+
+<mat-drawer-container class="drawer-container">
+  <mat-drawer #menuDrawer class="sidebar" mode="side" [opened]="authService.isAdmin()">
+    <mat-nav-list>
+      <!-- Dashboard -->
+      <mat-list-item>
+        <button mat-button routerLink="/admin/dashboard">
+          <mat-icon>dashboard</mat-icon>
+          <span>Tableau de bord</span>
+        </button>
+      </mat-list-item>
+
+      <!-- Customers Section -->
+      <mat-accordion multi="true">
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>person</mat-icon>
+              Clients
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <mat-action-list>
+            <button mat-list-item routerLink="/admin/customers">
+              <mat-icon>search</mat-icon>
+              Rechercher Clients
+            </button>
+            <button mat-list-item routerLink="/admin/new-customer-full">
+              <mat-icon>person_add</mat-icon>
+              Créer Client Complet
+            </button>
+            <button mat-list-item routerLink="/admin/customers">
+              <mat-icon>edit</mat-icon>
+              Gérer les Clients
+            </button>
+          </mat-action-list>
+        </mat-expansion-panel>
+      </mat-accordion>
+
+      <!-- Accounts Section -->
+      <mat-accordion multi="true">
+        <mat-expansion-panel>
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <mat-icon>account_balance</mat-icon>
+              Comptes
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          <mat-action-list>
+            <button mat-list-item routerLink="/admin/accounts">
+              <mat-icon>account_balance_wallet</mat-icon>
+              Faire une opération
+            </button>
+            <button mat-list-item routerLink="/admin/accounts">
+              <mat-icon>search</mat-icon>
+              Rechercher Comptes
+            </button>
+            <button mat-list-item routerLink="/admin/accountsList">
+              <mat-icon>edit</mat-icon>
+              Gérer les Comptes
+            </button>
+          </mat-action-list>
+        </mat-expansion-panel>
+      </mat-accordion>
+
+      <!-- User Management Section -->
+      <mat-list-item>
+        <button mat-button routerLink="/admin/users">
+          <mat-icon>security</mat-icon>
+          Gérer Utilisateurs
+        </button>
+      </mat-list-item>
+
+    </mat-nav-list>
+  </mat-drawer>
+
+  <mat-drawer-content>
+    <div class="content-wrapper">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-drawer-content>
+</mat-drawer-container>
