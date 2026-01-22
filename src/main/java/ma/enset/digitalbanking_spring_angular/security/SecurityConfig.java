@@ -36,9 +36,7 @@ public class SecurityConfig {
 
     @Value("${jwt.secret}")
     private String secretKey;
-    
-    // Les utilisateurs sont maintenant gérés en base de données via UserDetailsServiceImpl
-    // Plus besoin de InMemoryUserDetailsManager
+
     
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -53,6 +51,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                 .build();

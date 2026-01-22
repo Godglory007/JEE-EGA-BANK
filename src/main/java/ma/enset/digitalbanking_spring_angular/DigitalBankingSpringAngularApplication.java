@@ -1,5 +1,4 @@
 package ma.enset.digitalbanking_spring_angular;
-
 import ma.enset.digitalbanking_spring_angular.dtos.BankAccountDTO;
 import ma.enset.digitalbanking_spring_angular.dtos.CurrentBankAccountDTO;
 import ma.enset.digitalbanking_spring_angular.dtos.CustomerDTO;
@@ -20,7 +19,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
@@ -69,11 +67,11 @@ public class DigitalBankingSpringAngularApplication {
                 accountService.addNewRole("USER");
             }
             
-            // Créer les utilisateurs admin par défaut s'ils n'existent pas
+            
             try {
                 accountService.loadUserByUsername("admin");
             } catch (Exception e) {
-                // Créer l'admin
+                
                 accountService.addNewUser("admin", "admin@bank.com", "123", "123");
                 accountService.addRoleToUser("admin", "ADMIN");
                 accountService.addRoleToUser("admin", "MANAGER");
@@ -83,12 +81,12 @@ public class DigitalBankingSpringAngularApplication {
             try {
                 accountService.loadUserByUsername("glory");
             } catch (Exception e) {
-                // Créer glory
                 accountService.addNewUser("glory", "glory@bank.com", "glory", "glory");
-                accountService.addRoleToUser("glory", "ADMIN");
-                accountService.addRoleToUser("glory", "MANAGER");
-                accountService.addRoleToUser("glory", "USER");
             }
+            // Toujours ajouter les rôles à glory, même s'il existe déjà
+            accountService.addRoleToUser("glory", "ADMIN");
+            accountService.addRoleToUser("glory", "MANAGER");
+            accountService.addRoleToUser("glory", "USER");
         };
     }
 
@@ -108,7 +106,7 @@ public class DigitalBankingSpringAngularApplication {
                             .build()
                     )
             );
-            // Create bank accounts
+            // creer les comptes bancaires
             bankAccountService.listCustomers().forEach(customer -> {
                 try {
                     bankAccountService.saveCurrentAccountDTO(Math.random()*9000, 500, customer.getId());
@@ -138,7 +136,7 @@ public class DigitalBankingSpringAngularApplication {
 //    @Bean
     CommandLineRunner start(CustomerRepository customerRepository, AccountOperationRepository accountOperationRepository, BankAccountRepository bankAccountRepository) {
         return args -> {
-            // Create customers
+            // Creer un client
             Stream.of("Zaid", "Hassan", "Yassine").forEach(name ->
                     customerRepository.save(Customer.builder()
                     .name(name)
@@ -146,7 +144,7 @@ public class DigitalBankingSpringAngularApplication {
                     .build()
             ));
 
-            //Create bank accounts
+            //Creer compte bancaire
             customerRepository.findAll().forEach(customer -> {
                 CurrentAccount currentAccount = CurrentAccount.builder()
                         .id(generateAccountNumber())
@@ -169,7 +167,7 @@ public class DigitalBankingSpringAngularApplication {
                 );
             });
 
-            // Create account operations
+            // pour les operations
             bankAccountRepository.findAll().forEach(bankAccount -> {
                 for (int i = 0; i < 5; i++) {
                     accountOperationRepository.save(AccountOperation.builder()

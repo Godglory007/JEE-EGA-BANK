@@ -1,5 +1,4 @@
 package ma.enset.digitalbanking_spring_angular.security;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,6 +18,13 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @RestController
 @RequestMapping("/auth")
 public class SecurityController {
@@ -26,10 +32,31 @@ public class SecurityController {
     private AuthenticationManager authenticationManager;
     @Autowired
     private JwtEncoder jwtEncoder;
-    @GetMapping("/profile")
-    public Authentication authentication(Authentication authentication) {
-        return authentication;
-    }
+        @Operation(
+                summary = "Récupère le profil de l'utilisateur connecté",
+                description = "Retourne le nom d'utilisateur et si l'utilisateur est admin.",
+                tags = {"Authentification"},
+                security = @SecurityRequirement(name = "bearerAuth"),
+                responses = {
+                        @ApiResponse(
+                                responseCode = "200",
+                                description = "Profil utilisateur retourné avec succès",
+                                content = @Content(
+                                        mediaType = "application/json",
+                                        schema = @Schema(example = "{\n  'username': 'user1',\n  'admin': true\n}")
+                                )
+                        )
+                }
+        )
+        @GetMapping("/profile")
+        public Map<String, Object> profile(Authentication authentication) {
+                boolean isAdmin = authentication.getAuthorities().stream()
+                        .anyMatch(a -> a.getAuthority().equalsIgnoreCase("ROLE_ADMIN"));
+                return Map.of(
+                        "username", authentication.getName(),
+                        "admin", isAdmin
+                );
+        }
 
     @PostMapping("/login")
     public Map<String, String> login(String username, String pass){
